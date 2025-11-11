@@ -4,9 +4,9 @@ import sys
 import os
 
 # --- Module-Pfad hinzufügen ---
-MODULE_PATH = r"D:\Profile\a5574\Python\mongoDB\XRF_combined"
-if MODULE_PATH not in sys.path:
-    sys.path.append(MODULE_PATH)
+# MODULE_PATH = r"D:\Profile\a5574\Python\mongoDB\XRF_combined"
+# if MODULE_PATH not in sys.path:
+#     sys.path.append(MODULE_PATH)
 
 # --- Standard Imports ---
 import streamlit as st
@@ -44,21 +44,43 @@ def main():
     # ------------------ SPX Spectrum Viewer ------------------
     elif app_mode == "SPX Spectrum Viewer":
         st.title("📈 SPX Spectrum Viewer")
-
+    
         uploaded = st.file_uploader("Upload a .spx file", type=["spx"])
+    
         if uploaded:
+            import tempfile, os
+    
             try:
-                rec = parse_spx_file(uploaded)
+                # Temporäre Datei speichern
+                with tempfile.NamedTemporaryFile(delete=False, suffix=".spx") as tmp:
+                    tmp.write(uploaded.read())
+                    tmp_path = tmp.name
+    
+                # SPX-Datei parsen (jetzt mit Pfad!)
+                rec = parse_spx_file(tmp_path)
+    
+                # Energieachse und Counts extrahieren
                 energy = energy_axis_keV(rec)
                 counts = rec.get("counts", [])
-
+    
                 if counts:
-                    df_plot = pd.DataFrame({"Energy [keV]": energy, "Counts": counts})
+                    df_plot = pd.DataFrame({
+                        "Energy [keV]": energy,
+                        "Counts": counts
+                    })
                     st.line_chart(df_plot.set_index("Energy [keV]"))
                 else:
                     st.warning("Keine Zählungen gefunden.")
+    
             except Exception as e:
                 st.error(f"Fehler beim Parsen der SPX-Datei: {e}")
+    
+            finally:
+                # Temporäre Datei löschen
+                try:
+                    os.remove(tmp_path)
+                except Exception:
+                    pass
 
     # ------------------ Bruker XMethod XADF Viewer ------------------
     elif app_mode == "Bruker XMethod XADF Viewer":
@@ -159,4 +181,5 @@ def main():
                     st.code(raw_xml[:5000] + "\n... (truncated)", language="xml")
 
 if __name__ == "__main__":
+
     main()

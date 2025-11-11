@@ -5,3 +5,4 @@ plotly
 matplotlib
 pymongo
 pathlib
+xlrd

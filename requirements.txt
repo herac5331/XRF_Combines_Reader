@@ -1,0 +1,8 @@
+streamlit
+Pandas
+numpy
+plotly
+matplotlib
+pymongo
+XML
+pathlib

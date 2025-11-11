@@ -4,5 +4,4 @@ numpy
 plotly
 matplotlib
 pymongo
-XML
 pathlib

@@ -42,59 +42,59 @@ def main():
         viewer.run_streamlit_app()
 
     # ------------------ SPX Spectrum Viewer ------------------
-     elif app_mode == "SPX Spectrum Viewer":
-            st.title("📈 SPX Spectrum Viewer")
-    
-            uploaded = st.file_uploader("Upload a .spx file", type=["spx"])
-            show_plot = st.checkbox("Show spectrum plot", value=True)
-            show_json = st.checkbox("Show parsed JSON", value=False)
-    
-            if uploaded:
-                with tempfile.NamedTemporaryFile(delete=False, suffix=".spx") as tmp:
-                    tmp.write(uploaded.getvalue())
-                    tmp_path = tmp.name
-    
-                try:
-                    rec = parse_spx_file(tmp_path)
-                    st.success("✅ File successfully parsed!")
-    
-                    # Key info
-                    acq = rec.get("acquisition", {})
-                    st.subheader("Acquisition Info")
-                    st.write(f"**Spectrum:** {rec.get('spectrum_name','–')}")
-                    st.write(f"**Real time:** {acq.get('real_time_ms','–')} ms")
-                    st.write(f"**Live time:** {acq.get('live_time_ms','–')} ms")
-                    st.write(f"**Dead time:** {acq.get('dead_time_percent','–')} %")
-    
-                    # Spectrum plot
-                    if show_plot:
-                        counts = np.array(rec.get("counts") or [], dtype=float)
-                        if counts.size > 0:
-                            x = energy_axis_keV(rec)
-                            fig, ax = plt.subplots(figsize=(8, 4))
-                            ax.plot(x, counts, lw=1)
-                            ax.set_xlabel("Energy (keV)")
-                            ax.set_ylabel("Counts")
-                            ax.grid(True, alpha=0.3)
-                            ax.set_title(rec["spectrum_name"])
-                            st.pyplot(fig)
-                        else:
-                            st.warning("No counts data found.")
-    
-                    # JSON export
-                    json_bytes = json.dumps(rec, indent=2, ensure_ascii=False).encode("utf-8")
-                    st.download_button(
-                        label="💾 Download parsed JSON",
-                        data=json_bytes,
-                        file_name=f"{rec['spectrum_name']}_parsed.json",
-                        mime="application/json"
-                    )
-    
-                    if show_json:
-                        st.json(rec)
-    
-                except Exception as e:
-                    st.error(f"❌ Error parsing file: {e}")
+    elif app_mode == "SPX Spectrum Viewer":
+        st.title("📈 SPX Spectrum Viewer")
+
+        uploaded = st.file_uploader("Upload a .spx file", type=["spx"])
+        show_plot = st.checkbox("Show spectrum plot", value=True)
+        show_json = st.checkbox("Show parsed JSON", value=False)
+
+        if uploaded:
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".spx") as tmp:
+                tmp.write(uploaded.getvalue())
+                tmp_path = tmp.name
+
+            try:
+                rec = parse_spx_file(tmp_path)
+                st.success("✅ File successfully parsed!")
+
+                # Key info
+                acq = rec.get("acquisition", {})
+                st.subheader("Acquisition Info")
+                st.write(f"**Spectrum:** {rec.get('spectrum_name','–')}")
+                st.write(f"**Real time:** {acq.get('real_time_ms','–')} ms")
+                st.write(f"**Live time:** {acq.get('live_time_ms','–')} ms")
+                st.write(f"**Dead time:** {acq.get('dead_time_percent','–')} %")
+
+                # Spectrum plot
+                if show_plot:
+                    counts = np.array(rec.get("counts") or [], dtype=float)
+                    if counts.size > 0:
+                        x = energy_axis_keV(rec)
+                        fig, ax = plt.subplots(figsize=(8, 4))
+                        ax.plot(x, counts, lw=1)
+                        ax.set_xlabel("Energy (keV)")
+                        ax.set_ylabel("Counts")
+                        ax.grid(True, alpha=0.3)
+                        ax.set_title(rec["spectrum_name"])
+                        st.pyplot(fig)
+                    else:
+                        st.warning("No counts data found.")
+
+                # JSON export
+                json_bytes = json.dumps(rec, indent=2, ensure_ascii=False).encode("utf-8")
+                st.download_button(
+                    label="💾 Download parsed JSON",
+                    data=json_bytes,
+                    file_name=f"{rec['spectrum_name']}_parsed.json",
+                    mime="application/json"
+                )
+
+                if show_json:
+                    st.json(rec)
+
+            except Exception as e:
+                st.error(f"❌ Error parsing file: {e}")
 
     # ------------------ Bruker XMethod XADF Viewer ------------------
     elif app_mode == "Bruker XMethod XADF Viewer":
@@ -197,4 +197,5 @@ def main():
 if __name__ == "__main__":
 
     main()
+
 
